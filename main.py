@@ -1,5 +1,6 @@
 import json
 import requests
+from bottle import route, run, abort, static_file
 
 from math import radians, cos, sin, asin, sqrt
 
@@ -53,22 +54,11 @@ def find_distances_from(address):
 		result.append(u.get_distance_dict(address_loc))
 	return result
 
-def main():
-	global USERS
-	USERS = build_users('input.json')
-	for u in USERS:
-		print u.name
-		print u.coords
 
+USERS = build_users('input.json')
 
+@route('/static/<path:path>')
+def callback(path):
+    return static_file(path,root='static')
 
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-	main()
+run(host='localhost', port=8080,reloader=True)
