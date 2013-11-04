@@ -95,6 +95,8 @@ def build_html(address,address_loc,users):
 	image_src = "%s?center=%s&size=600x300&maptype=roadmap&%s&zoom=9&sensor=false" % (url,center,'&'.join(markers))
 
 	result.append('<img src="%s">' % (image_src))
+	result.append("<br/><br/>")
+	result.append("<h2>List of programmers by distance</h2>")
 	result.append('<table border="1">')
 	result.append("<tr>")
 	result.append("<th>Label</th>") 
