@@ -1,6 +1,6 @@
 import json
 import requests
-from bottle import route, run, abort, static_file
+from bottle import route, run, abort, static_file,request,post
 
 from math import radians, cos, sin, asin, sqrt
 
@@ -52,7 +52,7 @@ def find_distances_from(address):
 	result = []
 	for u in USERS:
 		result.append(u.get_distance_dict(address_loc))
-	return result
+	return (address_loc,result)
 
 
 USERS = build_users('input.json')
@@ -60,5 +60,63 @@ USERS = build_users('input.json')
 @route('/static/<path:path>')
 def callback(path):
     return static_file(path,root='static')
+
+@post('/find_users')
+def find_users():
+	address = request.POST['address']
+	(address_loc,result) = find_distances_from(address)
+	return build_html(address,address_loc,result)
+
+def build_html(address,address_loc,users):
+	result = []
+	result.append("""
+		<html>
+		<head>
+		<title>
+		Distances
+		</title>
+		</head>
+		<body>
+	""")
+
+	users = sorted(users,key=lambda x : x['distance'])
+	result.append("<h2>Results for location " + address + "</h2>")
+	url = 'http://maps.googleapis.com/maps/api/staticmap'
+	center = '%s,%s' % (address_loc['lat'],address_loc['lng'])
+	markers = []
+	for (i,u) in enumerate(users):
+		label = (chr(ord('A') + i))
+		markers.append('markers=color:red|label:%s|%s,%s' % (
+			label,
+			u['coords']['lat'],
+			u['coords']['lng']
+			))
+	markers.append('markers=color:blue|label:.|%s,%s' % (address_loc['lat'],address_loc['lng']))
+	image_src = "%s?center=%s&size=600x300&maptype=roadmap&%s&zoom=9&sensor=false" % (url,center,'&'.join(markers))
+
+	result.append('<img src="%s">' % (image_src))
+	result.append('<table border="1">')
+	result.append("<tr>")
+	result.append("<th>Label</th>") 
+	result.append("<th>Name</th>") 
+	result.append("<th>Address</th>") 
+	result.append("<th>Distance</th>") 
+	result.append("</tr>")
+	for (i,u) in enumerate(users):
+		result.append("<tr>")
+		result.append("<td>%s</td>" % (chr(ord('A') + i)))
+		result.append("<td>%s</td>" % (u['name']))
+		result.append("<td>%s</td>" % (u['address']))
+		result.append("<td>%s</td>" % (u['distance']))
+		result.append("</tr>")
+
+	result.append("</table>")
+	result.append("""
+		</body>
+		</html>
+	""")
+	return "\n".join(result)
+
+	
 
 run(host='localhost', port=8080,reloader=True)
