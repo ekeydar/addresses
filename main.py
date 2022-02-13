@@ -24,10 +24,6 @@ def geocode(address):
 	return r.json()['results'][0]['geometry']['location']
 
 def haversine(loc1, loc2):
-    """
-    Calculate the great circle distance between two points 
-    on the earth (specified in decimal degrees)
-    """
     # convert decimal degrees to radians 
     lon1, lat1, lon2, lat2 = map(radians, [loc1['lng'], loc1['lat'], loc2['lng'], loc2['lat']])
     # haversine formula 
