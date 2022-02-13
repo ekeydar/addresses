@@ -6,7 +6,7 @@ from math import radians, cos, sin, asin, sqrt
 
 USERS = None
 
-class User(object):
+class User:
 	def __init__(self,ju):
 		self.name = ju['name']
 		self.address = ju['address']
